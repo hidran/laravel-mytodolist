@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\TodoController;
+use App\Http\Controllers\TodoListController;
 use Illuminate\Support\Facades\Route;
-use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,11 +15,5 @@ use App\Models\User;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::get('user', function(){
-   
-  return User::where('email', 'hidran2@gmail.com')->get();
-});
+Route::resource('lists', TodoListController::class);
+Route::resource('todos', TodoController::class);

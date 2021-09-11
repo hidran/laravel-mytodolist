@@ -12,9 +12,14 @@ class TodoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        $limit = $req->input('per_page') ?? 10;
+        $list_id = $req->list_id ?? 1;
+        return Todo::select(['id', 'name', 'list_id'])
+            ->where('list_id', $list_id)
+            ->orderBy('id', 'DESC')
+            ->paginate($limit);
     }
 
     /**

@@ -12,9 +12,11 @@ class TodoListController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        $limit = $req->input('per_page') ?? 10;
+        return TodoList::select(['id', 'name', 'user_id'])->orderBy('name')
+            ->paginate($limit);
     }
 
     /**

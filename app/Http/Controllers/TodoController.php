@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Support\Jsonable;
 
 class TodoController extends Controller
 {
@@ -22,15 +24,7 @@ class TodoController extends Controller
             ->paginate($limit);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -40,7 +34,12 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $todo = new Todo();
+        $todo->name = $request->name;
+        $todo->list_id = $request->list_id;
+        $todo->duedate = $request->duedate ?? Carbon::now();
+        $res = $todo->save();
+        return $this->getResult($todo, $res, 'Todo created');
     }
 
     /**
@@ -51,18 +50,7 @@ class TodoController extends Controller
      */
     public function show(Todo $todo)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Todo  $todo
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Todo $todo)
-    {
-        //
+        return $this->getResult($todo, 1, 'Todo read');
     }
 
     /**
@@ -74,7 +62,13 @@ class TodoController extends Controller
      */
     public function update(Request $request, Todo $todo)
     {
-        //
+        $todo->name = $request->name;
+        $date = $request->duedate ?? $todo->duedate;
+        $todo->duedate = $date ?? Carbon::now();
+        $list = $request->list_id ?? $todo->list_id;
+        $todo->list_id = $list;
+        $res = $todo->save();
+        return $this->getResult($todo, $res, 'Todo updated');
     }
 
     /**
@@ -83,8 +77,20 @@ class TodoController extends Controller
      * @param  \App\Models\Todo  $todo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Todo $todo)
+    public function destroy(int $id, Request $request)
     {
-        //
+
+        $todo = Todo::whereId($id)->withTrashed()->first();
+        $res = !$request->forceDelete ? $todo->delete() : $todo->forceDelete();
+        $message = $request->forceDelete ? 'Todo deleted' : 'Todo logically deleted';
+        return $this->getResult($todo, $res, $message);
+    }
+    private function getResult(Jsonable $data, $success = true, $message = '')
+    {
+        return  [
+            'data' => $data,
+            'success' => $success,
+            'message' => $message
+        ];
     }
 }

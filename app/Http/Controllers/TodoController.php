@@ -18,7 +18,7 @@ class TodoController extends Controller
     {
         $limit = $req->input('per_page') ?? 10;
         $list_id = $req->list_id ?? 1;
-        return Todo::select(['id', 'name', 'list_id'])
+        return Todo::select(['id', 'name', 'list_id', 'completed'])
             ->where('list_id', $list_id)
             ->orderBy('id', 'DESC')
             ->paginate($limit);
@@ -67,6 +67,7 @@ class TodoController extends Controller
         $todo->duedate = $date ?? Carbon::now();
         $list = $request->list_id ?? $todo->list_id;
         $todo->list_id = $list;
+        $todo->completed = $request->completed ?? $todo->completed;
         $res = $todo->save();
         return $this->getResult($todo, $res, 'Todo updated');
     }

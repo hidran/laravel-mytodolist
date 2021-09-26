@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-
+use Illuminate\Support\Facades\Validator;
+use Hash;
 class AuthController extends Controller
 {
     /**
@@ -14,7 +17,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login','register']]);
     }
 
     /**
@@ -32,7 +35,25 @@ class AuthController extends Controller
 
         return $this->respondWithToken($token);
     }
+   public function register(Request $request)
+   {
 
+       $fields = $request->validate([
+           'name' => 'required|string| between:2,100',
+           'email' => 'required|email|unique:users',
+           'password' => 'required|min:6|confirmed'
+       ]) ;
+       $fields['password'] = Hash::make($fields['password']);
+       try {
+           $user = User::create(
+               $fields
+           );
+           $token = auth()->login($user);
+           return $this->respondWithToken($token);
+       } catch (\Exception $e){
+           return $e->getMessage();
+       }
+   }
     /**
      * Get the authenticated User.
      *
@@ -83,4 +104,5 @@ class AuthController extends Controller
             'email'=> $user->email
         ]);
     }
+
 }

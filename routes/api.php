@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('lists', TodoListController::class);
-Route::resource('todos', TodoController::class);
+Route::resource('lists', TodoListController::class)->middleware(['auth:api']);
+Route::resource('todos', TodoController::class)->middleware(['auth:api']);;
 
 Route::group([
 
